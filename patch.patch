@@ -1,0 +1,153 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c52ac90..4e8fdfe 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -21,6 +21,17 @@ if(CMAKE_CUDA_ARCHITECTURES)
+     set(USE_CMAKE_CUDA_ARCHITECTURES TRUE)
+ endif()
+ 
++# 设置ZLIB库和包含目录的路径
++set(ZLIB_INCLUDE_DIR "/usr/include")
++set(ZLIB_LIBRARY "/usr/lib64/libz.so")
++
++# 设置OpenSSL库和包含目录的路径
++set(OPENSSL_ROOT_DIR "/usr")
++set(OPENSSL_INCLUDE_DIR "/usr/include/openssl")
++set(OPENSSL_CRYPTO_LIBRARY "/usr/lib64/libcrypto.so")
++set(OPENSSL_SSL_LIBRARY "/usr/lib64/libssl.so")
++
++
+ project(cvcuda
+         LANGUAGES C CXX
+         VERSION 0.14.0
+diff --git a/ci/build.sh b/ci/build.sh
+index 6683529..4fde886 100755
+--- a/ci/build.sh
++++ b/ci/build.sh
+@@ -94,6 +94,8 @@ esac
+ # Configure build toolchain
+ CC=${CC:-$(find /usr/bin/gcc-11* | sort -rV | head -n 1)}
+ CXX=${CXX:-$(find /usr/bin/g++-11* | sort -rV | head -n 1)}
++# CC=/opt/rh/devtoolset-11/root/usr/bin/gcc
++# CXX=/opt/rh/devtoolset-11/root/usr/bin/g++
+ cmake_args="$cmake_args -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX"
+ 
+ # Use ninja if available
+@@ -119,8 +121,12 @@ for nvcc_path in /usr/local/cuda-$CUDA_MAJOR/bin/nvcc /usr/local/cuda/bin/nvcc;
+ done
+ 
+ # Create build tree and build
++# cmake -B "$build_dir" "$source_dir" $cmake_args $user_args -DZLIB_INCLUDE_DIR=/usr/include -DZLIB_LIBRARY=/usr/lib64/libz.so  -DOPENSSL_ROOT_DIR=/usr -DOPENSSL_INCLUDE_DIR=/usr/include/openssl -DOPENSSL_CRYPTO_LIBRARY=/usr/lib64/libcrypto.so -DOPENSSL_SSL_LIBRARY=/usr/lib64/libssl.so
++
++# cmake  --build "$build_dir" -- -j$num_jobs -DZLIB_INCLUDE_DIR=/usr/include -DZLIB_LIBRARY=/usr/lib64/libz.so -DOPENSSL_ROOT_DIR=/usr -DOPENSSL_INCLUDE_DIR=/usr/include/openssl -DOPENSSL_CRYPTO_LIBRARY=/usr/lib64/libcrypto.so -DOPENSSL_SSL_LIBRARY=/usr/lib64/libssl.so
++
+ cmake -B "$build_dir" "$source_dir" $cmake_args $user_args
+-cmake --build "$build_dir" -- -j$num_jobs
++cmake  --build "$build_dir" -- -j$num_jobs
+ 
+ # Show ccache status
+ if which ccache > /dev/null; then
+diff --git a/src/cvcuda/CMakeLists.txt b/src/cvcuda/CMakeLists.txt
+index 64c6c3d..22321f8 100644
+--- a/src/cvcuda/CMakeLists.txt
++++ b/src/cvcuda/CMakeLists.txt
+@@ -13,6 +13,9 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ 
++set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
++
++
+ add_subdirectory(util)
+ 
+ # cvcuda private implementation
+diff --git a/src/nvcv/src/CMakeLists.txt b/src/nvcv/src/CMakeLists.txt
+index fef54d2..a31cb0d 100644
+--- a/src/nvcv/src/CMakeLists.txt
++++ b/src/nvcv/src/CMakeLists.txt
+@@ -14,6 +14,10 @@
+ # limitations under the License.
+ 
+ # nvcv_types private implementation
++
++set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
++
++
+ add_subdirectory(priv)
+ 
+ add_library(nvcv_types
+diff --git a/tests/cvcuda/system/CMakeLists.txt b/tests/cvcuda/system/CMakeLists.txt
+index dbc20f7..ba2a789 100644
+--- a/tests/cvcuda/system/CMakeLists.txt
++++ b/tests/cvcuda/system/CMakeLists.txt
+@@ -12,6 +12,7 @@
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
++set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+ 
+ if(ENABLE_TEGRA)
+     include_directories(
+diff --git a/tests/cvcuda/unit/CMakeLists.txt b/tests/cvcuda/unit/CMakeLists.txt
+index e46d582..2988923 100644
+--- a/tests/cvcuda/unit/CMakeLists.txt
++++ b/tests/cvcuda/unit/CMakeLists.txt
+@@ -12,6 +12,7 @@
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
++set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+ 
+ add_executable(cvcuda_test_unit
+     TestWorkspaceAllocator.cpp
+diff --git a/tests/nvcv_types/cudatools_system/CMakeLists.txt b/tests/nvcv_types/cudatools_system/CMakeLists.txt
+index 8b735e1..fcfc254 100644
+--- a/tests/nvcv_types/cudatools_system/CMakeLists.txt
++++ b/tests/nvcv_types/cudatools_system/CMakeLists.txt
+@@ -15,6 +15,8 @@
+ 
+ project(nvcv_test_cudatools_system)
+ set(CMAKE_FOLDER tests)
++set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
++
+ 
+ add_executable(nvcv_test_cudatools_system
+     TestAtomics.cpp
+diff --git a/tests/nvcv_types/cudatools_unit/CMakeLists.txt b/tests/nvcv_types/cudatools_unit/CMakeLists.txt
+index 14477b5..13585f4 100644
+--- a/tests/nvcv_types/cudatools_unit/CMakeLists.txt
++++ b/tests/nvcv_types/cudatools_unit/CMakeLists.txt
+@@ -12,6 +12,8 @@
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
++set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
++
+ 
+ project(nvcv_test_cudatools_unit)
+ set(CMAKE_FOLDER tests)
+diff --git a/tests/nvcv_types/system/CMakeLists.txt b/tests/nvcv_types/system/CMakeLists.txt
+index e0e3fdb..68de46b 100644
+--- a/tests/nvcv_types/system/CMakeLists.txt
++++ b/tests/nvcv_types/system/CMakeLists.txt
+@@ -15,6 +15,8 @@
+ 
+ project(nvcv_test_types_system)
+ set(CMAKE_FOLDER tests)
++set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
++
+ 
+ # system core -------------------------------------------------
+ add_executable(nvcv_test_types_system
+diff --git a/tests/nvcv_types/unit/CMakeLists.txt b/tests/nvcv_types/unit/CMakeLists.txt
+index a57009b..150fe73 100644
+--- a/tests/nvcv_types/unit/CMakeLists.txt
++++ b/tests/nvcv_types/unit/CMakeLists.txt
+@@ -12,6 +12,7 @@
+ # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
++set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+ 
+ add_executable(nvcv_test_types_unit
+     TestHashMD5.cpp

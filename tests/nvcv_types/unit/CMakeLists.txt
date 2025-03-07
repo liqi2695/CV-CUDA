@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
 add_executable(nvcv_test_types_unit
     TestHashMD5.cpp

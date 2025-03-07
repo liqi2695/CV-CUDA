@@ -15,6 +15,8 @@
 
 project(nvcv_test_cudatools_system)
 set(CMAKE_FOLDER tests)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+
 
 add_executable(nvcv_test_cudatools_system
     TestAtomics.cpp

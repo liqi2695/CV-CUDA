@@ -15,6 +15,8 @@
 
 project(nvcv_test_types_system)
 set(CMAKE_FOLDER tests)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+
 
 # system core -------------------------------------------------
 add_executable(nvcv_test_types_system

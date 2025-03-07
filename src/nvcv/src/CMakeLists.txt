@@ -14,6 +14,10 @@
 # limitations under the License.
 
 # nvcv_types private implementation
+
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+
+
 add_subdirectory(priv)
 
 add_library(nvcv_types

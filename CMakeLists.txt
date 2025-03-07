@@ -21,6 +21,17 @@ if(CMAKE_CUDA_ARCHITECTURES)
     set(USE_CMAKE_CUDA_ARCHITECTURES TRUE)
 endif()
 
+# 设置ZLIB库和包含目录的路径
+set(ZLIB_INCLUDE_DIR "/usr/include")
+set(ZLIB_LIBRARY "/usr/lib64/libz.so")
+
+# 设置OpenSSL库和包含目录的路径
+set(OPENSSL_ROOT_DIR "/usr")
+set(OPENSSL_INCLUDE_DIR "/usr/include/openssl")
+set(OPENSSL_CRYPTO_LIBRARY "/usr/lib64/libcrypto.so")
+set(OPENSSL_SSL_LIBRARY "/usr/lib64/libssl.so")
+
+
 project(cvcuda
         LANGUAGES C CXX
         VERSION 0.14.0

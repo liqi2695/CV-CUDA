@@ -94,6 +94,8 @@ esac
 # Configure build toolchain
 CC=${CC:-$(find /usr/bin/gcc-11* | sort -rV | head -n 1)}
 CXX=${CXX:-$(find /usr/bin/g++-11* | sort -rV | head -n 1)}
+# CC=/opt/rh/devtoolset-11/root/usr/bin/gcc
+# CXX=/opt/rh/devtoolset-11/root/usr/bin/g++
 cmake_args="$cmake_args -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX"
 
 # Use ninja if available
@@ -119,8 +121,12 @@ for nvcc_path in /usr/local/cuda-$CUDA_MAJOR/bin/nvcc /usr/local/cuda/bin/nvcc; 
 done
 
 # Create build tree and build
+# cmake -B "$build_dir" "$source_dir" $cmake_args $user_args -DZLIB_INCLUDE_DIR=/usr/include -DZLIB_LIBRARY=/usr/lib64/libz.so  -DOPENSSL_ROOT_DIR=/usr -DOPENSSL_INCLUDE_DIR=/usr/include/openssl -DOPENSSL_CRYPTO_LIBRARY=/usr/lib64/libcrypto.so -DOPENSSL_SSL_LIBRARY=/usr/lib64/libssl.so
+
+# cmake  --build "$build_dir" -- -j$num_jobs -DZLIB_INCLUDE_DIR=/usr/include -DZLIB_LIBRARY=/usr/lib64/libz.so -DOPENSSL_ROOT_DIR=/usr -DOPENSSL_INCLUDE_DIR=/usr/include/openssl -DOPENSSL_CRYPTO_LIBRARY=/usr/lib64/libcrypto.so -DOPENSSL_SSL_LIBRARY=/usr/lib64/libssl.so
+
 cmake -B "$build_dir" "$source_dir" $cmake_args $user_args
-cmake --build "$build_dir" -- -j$num_jobs
+cmake  --build "$build_dir" -- -j$num_jobs
 
 # Show ccache status
 if which ccache > /dev/null; then
