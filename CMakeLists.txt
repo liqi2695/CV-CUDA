@@ -31,6 +31,7 @@ set(OPENSSL_INCLUDE_DIR "/usr/include/openssl")
 set(OPENSSL_CRYPTO_LIBRARY "/usr/lib64/libcrypto.so")
 set(OPENSSL_SSL_LIBRARY "/usr/lib64/libssl.so")
 
+include_directories(/root/python3/versions/include/python3.10)
 
 project(cvcuda
         LANGUAGES C CXX
